@@ -4,38 +4,23 @@ def load_inventory():
     """Load total and transaction history from inventory.txt"""
     try:
         with open("inventory.txt", "r") as file:
-            lines = file.readlines()  # Returns list of lines
+            lines = file.readlines()
             
             if len(lines) >= 2:
-                # First line: total (strip whitespace/newline)
-                total = int(lines.strip())  # ✅ FIXED - use lines
-                
-                # Second line: transaction history (strip whitespace/newline)
-                history_str = lines.strip()  # ✅ FIXED - use lines
-                
+                total = int(lines.strip())
+                # Parse transaction history from second line
+                history_str = lines.strip()
                 if history_str:
-                    # Split comma-separated values into integers
-                    history = [int(x.strip()) for x in history_str.split(",")]
+                    history = [int(x) for x in history_str.split(",")]
                 else:
                     history = []
-                
                 return total, history
             else:
-                # File exists but doesn't have enough lines
                 return 0, []
-                
     except FileNotFoundError:
-        # File doesn't exist yet - start fresh
-        print("No previous inventory found. Starting fresh.")
+        # File doesn't exist, start fresh
         return 0, []
-        
-    except ValueError as e:
-        # Invalid data format in file
-        print(f"Error parsing inventory file: {e}")
-        return 0, []
-        
     except Exception as e:
-        # Any other error
         print(f"Error loading inventory: {e}")
         return 0, []
 
@@ -44,6 +29,7 @@ def save_inventory(total_units, transaction_history):
     try:
         with open("inventory.txt", "w") as file:
             file.write(f"{total_units}\n")
+            # Save transaction history as comma-separated values
             file.write(",".join(map(str, transaction_history)) + "\n")
         print("Inventory saved successfully to inventory.txt")
     except Exception as e:
@@ -81,23 +67,25 @@ def main():
 
     # Load previous inventory data
     total_units, transaction_history = load_inventory()
-
-    # Initialize counters
-    deliveries_processed = len(transaction_history) 
-    failed_attempts = 0  # ✅ ADDED - initialize here too
     
+    deliveries_processed = len(transaction_history)  # Count from history
+    failed_attempts = 0
+
     print("SMART DELIVERY AUDITOR")
-    print("Type 'quit' to exit\n")
+    print("Type 'quit' to exit")
     
     if total_units > 0:
         print(f"Loaded previous total: {total_units}")
         print(f"Previous transactions: {transaction_history}\n")
+    else:
+        print("Starting fresh (no previous data)\n")
 
     while True:
         value = get_valid_input()
 
         if value == "quit":
-            save_inventory(total_units, transaction_history)  # ✅ ADDED
+            # Save before exiting
+            save_inventory(total_units, transaction_history)
             break
 
         if value < 0:
@@ -106,15 +94,14 @@ def main():
             continue
 
         total_units = process_delivery(total_units, value)
-        transaction_history.append(value)  # ✅ ADDED - THIS IS KEY FOR STEP 2!
+        transaction_history.append(value)  # Track valid transaction
         deliveries_processed += 1
         tax = calculate_tax(value)
 
         print(f"Added delivery: {value}")
         print(f"Current total: {total_units}")
-        print(f"Tax for this delivery: \${tax:.2f}")
-        print(f"Deliveries processed: {deliveries_processed}")
-        print(f"Transaction history: {transaction_history}\n")  # ✅ Show history for debugging
+        print(f"Tax for this delivery: ${tax:.2f}")
+        print(f"Deliveries processed: {deliveries_processed}\n")
 
     generate_report(total_units, failed_attempts)
 
