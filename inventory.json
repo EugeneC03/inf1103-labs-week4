@@ -1,0 +1,38 @@
+[
+  {
+    "id": "P001",
+    "name": "Laptop",
+    "price": 1200.0,
+    "stock": 15
+  },
+  {
+    "id": "P002",
+    "name": "Mouse",
+    "price": 25.5,
+    "stock": 40
+  },
+  {
+    "id": "P003",
+    "name": "Keyboard",
+    "price": 45.0,
+    "stock": 100
+  },
+  {
+    "id": "P004",
+    "name": "Adpater",
+    "price": 15.3,
+    "stock": 96
+  },
+  {
+    "id": "P005",
+    "name": "Phone",
+    "price": 1500.0,
+    "stock": 20
+  },
+  {
+    "id": "P006",
+    "name": "PLug",
+    "price": 5.5,
+    "stock": 30
+  }
+]
