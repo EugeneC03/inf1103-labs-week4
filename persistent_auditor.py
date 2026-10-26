@@ -42,6 +42,27 @@ class Product:
             "stock": self._stock,
         }
 
+class Inventory:
+    def __init__(self):
+        self.products = []
+
+    def add_product(self, product: Product):
+        self.products.append(product)
+
+    def search_product(self, search_term: str):
+        search_term = search_term.strip().upper()
+        for product in self.products:
+            if product.product_id.upper() == search_term or product.name.upper() == search_term:
+                return product
+        return None
+
+    def display_all(self):
+        print("Current Inventory")
+        print("-" * 50)
+        for product in self.products:
+            product.display_information()
+        print("-" * 50)
+
 def load_inventory():
     """Load inventory from inventory.json or use default products."""
     default_inventory = [
