@@ -3,6 +3,13 @@ import json
 
 INVENTORY_FILE = "inventory.json"
 
+class CanBeShipped(ABC):
+    """Interface-style contract for items that can be shipped."""
+
+    @abstractmethod
+    def calculate_shipping_cost(self) -> float:
+        """Calculate and return the shipping fee."""
+        pass
 
 class Product(ABC):
     def __init__(self, product_id: str, name: str, price: float, stock: int):
@@ -51,7 +58,7 @@ class Product(ABC):
         }
 
 
-class PhysicalProduct(Product):
+class PhysicalProduct(Product, CanBeShipped):
     def __init__(self, product_id: str, name: str, price: float, stock: int, weight: float):
         super().__init__(product_id, name, price, stock)
         self._weight = float(weight)
@@ -60,12 +67,18 @@ class PhysicalProduct(Product):
     def weight(self):
         return self._weight
 
+    def calculate_shipping_cost(self) -> float:
+        # $5.00 base fee + $2.50 per kg
+        return 5.00 + (self._weight * 2.50)
+
     def get_fulfilment_info(self) -> str:
-        return "Physical shipping required."
+        return f"Physical shipping required. Shipping fee: ${self.calculate_shipping_cost():.2f}"
 
     def display_information(self):
         super().display_information()
-        print(f"Type: Physical | Weight: {self._weight:.2f}kg")
+        print(
+            f"Type: Physical | Weight: {self._weight:.2f}kg | Fulfilment: {self.get_fulfilment_info()}"
+        )
 
     def to_dict(self):
         data = super().to_dict()
@@ -88,7 +101,9 @@ class DigitalProduct(Product):
 
     def display_information(self):
         super().display_information()
-        print(f"Type: Digital | Size: {self._download_size:.1f}MB")
+        print(
+            f"Type: Digital  | Size: {self._download_size:.1f}MB | Fulfilment: {self.get_fulfilment_info()}"
+        )
 
     def to_dict(self):
         data = super().to_dict()
@@ -210,13 +225,16 @@ def add_product(inventory: Inventory):
 
 
 def update_stock(inventory: Inventory):
-    """Update the stock of an existing product."""
+    """Update stock of an existing product."""
     product_id = input("Enter product ID: ").strip().upper()
     product = inventory.search_product(product_id)
 
     if product:
-        new_stock = int(input("Enter new stock: ").strip())
-        product.update_stock(new_stock)
+        try:
+            new_stock = int(input("Enter new stock: ").strip())
+            product.update_stock(new_stock)
+        except ValueError:
+            print("Invalid input. Stock must be an integer.")
     else:
         print("Product not found.")
 
