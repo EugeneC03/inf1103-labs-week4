@@ -3,36 +3,56 @@
     "id": "P001",
     "name": "Laptop",
     "price": 1200.0,
-    "stock": 15
+    "stock": 15,
+    "type": "physical",
+    "weight": 2.2
   },
   {
     "id": "P002",
     "name": "Mouse",
     "price": 25.5,
-    "stock": 40
+    "stock": 40,
+    "type": "physical",
+    "weight": 0.12
   },
   {
     "id": "P003",
     "name": "Keyboard",
     "price": 45.0,
-    "stock": 200
+    "stock": 200,
+    "type": "physical",
+    "weight": 0.85
   },
   {
     "id": "P004",
-    "name": "Adpater",
+    "name": "Adapter Manual",
     "price": 15.3,
-    "stock": 96
+    "stock": 96,
+    "type": "digital",
+    "download_size": 12.5
   },
   {
     "id": "P005",
     "name": "Phone",
     "price": 1500.0,
-    "stock": 20
+    "stock": 20,
+    "type": "physical",
+    "weight": 0.22
   },
   {
     "id": "P006",
-    "name": "Plug",
+    "name": "Plug Firmware",
     "price": 5.5,
-    "stock": 30
+    "stock": 30,
+    "type": "digital",
+    "download_size": 4.8
+  },
+  {
+    "id": "P007",
+    "name": "ETHERNET CABLE",
+    "price": 8.6,
+    "stock": 250,
+    "type": "physical",
+    "weight": 0.1
   }
 ]
