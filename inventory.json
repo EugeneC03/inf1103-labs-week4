@@ -4,6 +4,11 @@
     "name": "Laptop",
     "price": 1200.0,
     "stock": 15,
+    "supplier": {
+      "supplier_id": "S001",
+      "name": "TechSource Pte Ltd",
+      "contact_email": "sales@techsource.sg"
+    },
     "type": "physical",
     "weight": 2.2
   },
@@ -12,6 +17,11 @@
     "name": "Mouse",
     "price": 25.5,
     "stock": 40,
+    "supplier": {
+      "supplier_id": "S001",
+      "name": "TechSource Pte Ltd",
+      "contact_email": "sales@techsource.sg"
+    },
     "type": "physical",
     "weight": 0.12
   },
@@ -20,6 +30,11 @@
     "name": "Keyboard",
     "price": 45.0,
     "stock": 200,
+    "supplier": {
+      "supplier_id": "S001",
+      "name": "TechSource Pte Ltd",
+      "contact_email": "sales@techsource.sg"
+    },
     "type": "physical",
     "weight": 0.85
   },
@@ -28,6 +43,11 @@
     "name": "Adapter Manual",
     "price": 15.3,
     "stock": 96,
+    "supplier": {
+      "supplier_id": "S001",
+      "name": "TechSource Pte Ltd",
+      "contact_email": "sales@techsource.sg"
+    },
     "type": "digital",
     "download_size": 12.5
   },
@@ -36,6 +56,11 @@
     "name": "Phone",
     "price": 1500.0,
     "stock": 20,
+    "supplier": {
+      "supplier_id": "S001",
+      "name": "TechSource Pte Ltd",
+      "contact_email": "sales@techsource.sg"
+    },
     "type": "physical",
     "weight": 0.22
   },
@@ -44,6 +69,11 @@
     "name": "Plug Firmware",
     "price": 5.5,
     "stock": 30,
+    "supplier": {
+      "supplier_id": "S001",
+      "name": "TechSource Pte Ltd",
+      "contact_email": "sales@techsource.sg"
+    },
     "type": "digital",
     "download_size": 4.8
   },
@@ -52,6 +82,11 @@
     "name": "ETHERNET CABLE",
     "price": 8.6,
     "stock": 250,
+    "supplier": {
+      "supplier_id": "S001",
+      "name": "TechSource Pte Ltd",
+      "contact_email": "sales@techsource.sg"
+    },
     "type": "physical",
     "weight": 0.1
   }
