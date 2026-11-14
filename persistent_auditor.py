@@ -163,6 +163,40 @@ class Inventory:
         print("-" * 50)
 
 
+class DiscountStrategy(ABC):
+    @abstractmethod
+    def apply(self, total: float) -> float:
+        pass
+
+
+class NoDiscount(DiscountStrategy):
+    def apply(self, total: float) -> float:
+        return total
+
+
+class PercentageDiscount(DiscountStrategy):
+    def __init__(self, percentage: float):
+        self.percentage = float(percentage)
+
+    def apply(self, total: float) -> float:
+        return total * (1 - self.percentage / 100)   # 10 -> multiply by 0.9
+
+
+class BulkDiscount(DiscountStrategy):
+    def __init__(self, threshold: float, amount: float):
+        self.threshold = float(threshold)
+        self.amount = float(amount)
+
+    def apply(self, total: float) -> float:
+        if total >= self.threshold:
+            return total - self.amount
+        return total
+
+
+class StudentDiscount(DiscountStrategy):        # Section 2.4 - the 4th one
+    def apply(self, total: float) -> float:
+        return total * 0.95
+
 class OrderLine:
     def __init__(self, product: Product, quantity: int):
         self.product: Product = product
@@ -176,9 +210,13 @@ class OrderLine:
               f"= ${self.calculate_subtotal():.2f}")
 
 class Order:
-    def __init__(self, order_id: str):
+    def __init__(self, order_id: str, discount: DiscountStrategy | None = None):
         self.order_id: str = order_id
         self.order_lines: list[OrderLine] = []
+        self.discount: DiscountStrategy = discount if discount is not None else NoDiscount()
+
+    def set_discount(self, discount: DiscountStrategy) -> None:
+        self.discount = discount
 
     def add_order_line(self, product: Product, quantity: int) -> None:
         order_line = OrderLine(product, quantity)   # Order CREATES it
@@ -192,7 +230,8 @@ class Order:
         return False
 
     def calculate_total(self) -> float:
-        return sum(line.calculate_subtotal() for line in self.order_lines)
+        total = sum(line.calculate_subtotal() for line in self.order_lines)
+        return self.discount.apply(total)        # NO if/elif here
 
     def display_order(self) -> None:
         print(f"Order {self.order_id}")
@@ -351,8 +390,24 @@ def remove_product(inventory: Inventory) -> None:
     else:
         print("Product not found.")
 
+def choose_discount() -> DiscountStrategy:
+    """The MENU picks which strategy object to hand to Order. Order itself never decides."""
+    print("Select discount:")
+    print("1. No discount")
+    print("2. 10% percentage discount")
+    print("3. Bulk discount ($20 off orders of $200 or more)")
+    print("4. Student discount (5%)")
+    choice = input("Enter choice (1-4): ").strip()
+    if choice == "2":
+        return PercentageDiscount(10)
+    elif choice == "3":
+        return BulkDiscount(200, 20)
+    elif choice == "4":
+        return StudentDiscount()
+    return NoDiscount()
+
 def create_order(inventory: Inventory, order_count: int) -> None:
-    order = Order(f"O{order_count:03d}")
+    order = Order(f"O{order_count:03d}", choose_discount())
     print(f"Creating order {order.order_id}. Type 'done' when finished.")
     while True:
         product_id = input("Enter product ID (or 'done'): ").strip().upper()
