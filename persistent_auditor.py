@@ -28,10 +28,17 @@ class CanBeShipped(ABC):
 
 class Product(ABC):
     def __init__(self, product_id: str, name: str, price: float, stock: int, supplier: Supplier):
+        price = float(price)          # may raise ValueError if price is not a number
+        stock = int(stock)            # may raise ValueError if stock is not a number
+        if price <= 0:
+            raise ValueError("Price must be greater than zero.")
+        if stock < 0:
+            raise ValueError("Stock cannot be negative.")
+
         self._product_id = product_id
         self.name = name
-        self._price = float(price)
-        self._stock = int(stock)
+        self._price = price
+        self._stock = stock
         self.supplier: Supplier = supplier
 
     @property
@@ -47,11 +54,10 @@ class Product(ABC):
         return self._stock
 
     def update_stock(self, new_stock: int) -> None:
-        if new_stock >= 0:
-            self._stock = new_stock
-            print(f"Stock updated for {self.name}.")
-        else:
-            print("Stock cannot be negative.")
+        if new_stock < 0:
+            raise ValueError("Stock cannot be negative.")
+        self._stock = new_stock
+        print(f"Stock updated for {self.name}.")
 
     def display_information(self) -> None:
         print(
@@ -213,6 +219,8 @@ class StudentDiscount(DiscountStrategy):        # Section 2.4 - the 4th one
 
 class OrderLine:
     def __init__(self, product: Product, quantity: int):
+        if quantity <= 0:
+            raise ValueError("Quantity must be greater than zero.")
         self.product: Product = product
         self.quantity: int = quantity
 
@@ -313,7 +321,7 @@ def save_inventory(inventory: Inventory):
         json.dump(data, file, indent=2)
 
 
-def add_product(inventory: Inventory, suppliers: dict[str, Supplier]) -> None: 
+def add_product(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
     """Add a new product to the inventory."""
     print("\nSelect Product Type:")
     print("1. Physical Product")
@@ -333,9 +341,6 @@ def add_product(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
     try:
         price = float(input("Enter price: ").strip())
         stock = int(input("Enter stock: ").strip())
-        if price < 0 or stock < 0:
-            print("Price and stock cannot be negative.")
-            return
 
         sid = input("Enter supplier ID: ").strip().upper()
         if sid in suppliers:
@@ -357,9 +362,8 @@ def add_product(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
 
         inventory.add_product(new_product)
         print("Product added successfully.")
-    except ValueError:
-        print("Invalid input format.")
-
+    except ValueError as e:
+        print(f"Could not add product: {e}")
 
 def update_stock(inventory: Inventory) -> None:
     """Update stock of an existing product."""
@@ -370,8 +374,8 @@ def update_stock(inventory: Inventory) -> None:
         try:
             new_stock = int(input("Enter new stock: ").strip())
             product.update_stock(new_stock)
-        except ValueError:
-            print("Invalid input. Stock must be an integer.")
+        except ValueError as e:
+            print(f"Invalid stock: {e}")
     else:
         print("Product not found.")
 
@@ -424,8 +428,9 @@ def create_order(inventory: Inventory, order_count: int) -> None:
             continue
         try:
             quantity = int(input("Enter quantity: ").strip())
-        except ValueError:
-            print("Quantity must be an integer.")
+            order.add_order_line(product, quantity)
+        except ValueError as e:
+            print(f"Invalid quantity: {e}")
             continue
         order.add_order_line(product, quantity)
     order.display_order()
