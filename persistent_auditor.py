@@ -129,6 +129,20 @@ class DigitalProduct(Product):
         data["download_size"] = self._download_size
         return data
 
+
+class ProductFactory:
+    @staticmethod
+    def create(product_type: str, product_id: str, name: str, price: float,
+               stock: int, supplier: Supplier,
+               weight: float = 1.0, download_size: float = 100.0) -> Product:
+        product_type = product_type.strip().lower()
+        if product_type == "physical":
+            return PhysicalProduct(product_id, name, price, stock, supplier, weight)
+        elif product_type == "digital":
+            return DigitalProduct(product_id, name, price, stock, supplier, download_size)
+        else:
+            raise ValueError(f"Unknown product type: {product_type}")
+
 class Inventory:
     def __init__(self):
         self.products: list[Product] = []
@@ -262,27 +276,16 @@ def load_inventory() -> tuple[Inventory, dict[str, Supplier]]:
             if isinstance(data, list) and data:
                 for item in data:
                     supplier = get_or_create_supplier(item.get("supplier"), suppliers)
-                    item_type = item.get("type", "physical").lower()
-                    if item_type == "digital":
-                        prod = DigitalProduct(
-                            product_id=item["id"],
-                            name=item["name"],
-                            price=item["price"],
-                            stock=item["stock"],
-                            supplier=supplier, 
-                            download_size=float(
-                                item.get("download_size", 100.0)
-                            ),
-                        )
-                    else:
-                        prod = PhysicalProduct(
-                            product_id=item["id"],
-                            name=item["name"],
-                            price=item["price"],
-                            stock=item["stock"],
-                            supplier=supplier, 
-                            weight=float(item.get("weight", 1.0)),
-                        )
+                    prod = ProductFactory.create(
+                        item.get("type", "physical"),
+                        item["id"],
+                        item["name"],
+                        item["price"],
+                        item["stock"],
+                        supplier,
+                        weight=float(item.get("weight", 1.0)),
+                        download_size=float(item.get("download_size", 100.0)),
+                    )
                     inventory.add_product(prod)
                 print("inventory.json found.")
                 print("Inventory loaded successfully.")
@@ -294,9 +297,9 @@ def load_inventory() -> tuple[Inventory, dict[str, Supplier]]:
     
     supplier = get_or_create_supplier(None, suppliers)
     default_products = [
-        PhysicalProduct("P001", "Laptop", 1200.00, 15, supplier, weight=2.3),
-        PhysicalProduct("P002", "Mouse", 25.50, 40, supplier, weight=0.15),
-        DigitalProduct("P003", "Antivirus", 45.00, 25, supplier, download_size=250.0),
+        ProductFactory.create("physical", "P001", "Laptop", 1200.00, 15, supplier, weight=2.3),
+        ProductFactory.create("physical", "P002", "Mouse", 25.50, 40, supplier, weight=0.15),
+        ProductFactory.create("digital", "P003", "Antivirus", 45.00, 25, supplier, download_size=250.0),
     ]
     for product in default_products:
         inventory.add_product(product)
@@ -345,10 +348,12 @@ def add_product(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
 
         if p_type == "1":
             weight = float(input("Enter weight in kg: ").strip())
-            new_product = PhysicalProduct(product_id, name, price, stock, supplier, weight)
+            new_product = ProductFactory.create("physical", product_id, name, price,
+                                                stock, supplier, weight=weight)
         else:
             download_size = float(input("Enter download size in MB: ").strip())
-            new_product = DigitalProduct(product_id, name, price, stock, supplier, download_size)
+            new_product = ProductFactory.create("digital", product_id, name, price,
+                                                stock, supplier, download_size=download_size)
 
         inventory.add_product(new_product)
         print("Product added successfully.")
