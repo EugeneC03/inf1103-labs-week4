@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 import json
+import csv
 
 INVENTORY_FILE = "inventory.json"
+PRODUCTS_CSV = "products.csv"
 
 class Supplier:
     def __init__(self, supplier_id: str, name: str, contact_email: str):
@@ -274,6 +276,53 @@ def get_or_create_supplier(data: dict | None, suppliers: dict[str, Supplier]) ->
     return suppliers[sid]
 
 
+def get_positive_float(prompt: str) -> float:
+    while True:
+        try:
+            value = float(input(prompt))
+            if value <= 0:
+                print("Please enter a number greater than zero.")
+                continue
+            return value
+        except ValueError:
+            print("Please enter a valid number, e.g. 12.50")
+
+
+def get_non_negative_int(prompt: str) -> int:
+    while True:
+        try:
+            value = int(input(prompt))
+            if value < 0:
+                print("Please enter 0 or a positive whole number.")
+                continue
+            return value
+        except ValueError:
+            print("Please enter a whole number, e.g. 10")
+
+
+def load_products(path: str, inventory: Inventory, supplier: Supplier) -> None:
+    try:
+        file = open(path, newline="")
+    except FileNotFoundError:
+        print(f"Products file not found: {path}")
+    else:
+        loaded = 0
+        with file:
+            reader = csv.reader(file)
+            next(reader, None)                      # skip the header row
+            for row in reader:
+                try:
+                    product_type, product_id, name, price, stock = row
+                    product = ProductFactory.create(product_type, product_id, name,
+                                                    price, stock, supplier)
+                    inventory.add_product(product)
+                    loaded += 1
+                except ValueError as e:
+                    print(f"Skipped row {row}: {e}")
+        print(f"{loaded} products loaded.")
+    finally:
+        print("Load attempt finished.")
+
 def load_inventory() -> tuple[Inventory, dict[str, Supplier]]:
     inventory = Inventory()
     suppliers: dict[str, Supplier] = {}
@@ -339,8 +388,8 @@ def add_product(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
 
     name = input("Enter product name: ").strip().upper()
     try:
-        price = float(input("Enter price: ").strip())
-        stock = int(input("Enter stock: ").strip())
+        price = get_positive_float("Enter price: ")
+        stock = get_non_negative_int("Enter stock: ")
 
         sid = input("Enter supplier ID: ").strip().upper()
         if sid in suppliers:
@@ -352,11 +401,11 @@ def add_product(inventory: Inventory, suppliers: dict[str, Supplier]) -> None:
             suppliers[sid] = supplier
 
         if p_type == "1":
-            weight = float(input("Enter weight in kg: ").strip())
+            weight = get_positive_float("Enter weight in kg: ")
             new_product = ProductFactory.create("physical", product_id, name, price,
                                                 stock, supplier, weight=weight)
         else:
-            download_size = float(input("Enter download size in MB: ").strip())
+            download_size = get_positive_float("Enter download size in MB: ")
             new_product = ProductFactory.create("digital", product_id, name, price,
                                                 stock, supplier, download_size=download_size)
 
@@ -452,13 +501,14 @@ def main() -> None:
         print("4. Search Product")
         print("5. Save Inventory")
         print("6. Remove Product")                                    
-        print("7. Create Order")                                      
-        print("8. Exit")                      
+        print("7. Create Order")
+        print("8. Load Products from CSV")
+        print("9. Exit")                     
         print("---------------------------")
 
         choice = input("Enter option: ").strip().lower()
 
-        if choice in ["exit", "quit", "8"]:
+        if choice in ["exit", "quit", "9"]:
             save_inventory(inventory)
             print("Saving inventory before exit...")
             print("Inventory saved successfully.")
@@ -478,9 +528,11 @@ def main() -> None:
             print("Inventory saved successfully.")
         elif choice == "6":                                            
             remove_product(inventory)
-        elif choice == "7":                                            
+        elif choice == "7":
             order_count += 1
             create_order(inventory, order_count)
+        elif choice == "8":
+            load_products(PRODUCTS_CSV, inventory, DEFAULT_SUPPLIER)
         else:
             print("Invalid option.")
 
